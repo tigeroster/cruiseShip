@@ -1,1 +1,1 @@
-# cruiseShip
+# Cruise Ship Management System
