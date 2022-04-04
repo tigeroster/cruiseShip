@@ -49,6 +49,9 @@ class CruiseShip {
                 System.out.println("------------------------------------------------------------------------------------");
                 System.out.println("|                   T : View Passenger Expenses");
                 System.out.println("------------------------------------------------------------------------------------");
+                System.out.println("------------------------------------------------------------------------------------");
+                System.out.println("|                   X : Exit the Program");
+                System.out.println("------------------------------------------------------------------------------------");
                 System.out.println();
 
                 System.out.println("Enter your option to proceed : ");
@@ -66,6 +69,7 @@ class CruiseShip {
                     case "L" -> loadProgramDataFromFile(passengers);
                     case "O" -> viewPassengersAlphabetically(passengers);
                     case "T" -> viewPassengerExpense(passengers);
+                    case "X" -> System.exit(0);
                     default -> System.out.println("Invalid Input");
                 }
                 System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
@@ -135,6 +139,9 @@ class CruiseShip {
         while (count != 1){
             try{
                 Scanner sc = new Scanner(System.in);
+                System.out.println("Here are the Available Rooms\n");
+                checkRoomVacancy(cabins, passengers);
+                System.out.println();
                 System.out.println("Enter a Cabin Number from (1 - 12)");
                 int cabinNum = sc.nextInt() - 1;
                 System.out.println("Enter the Passenger Number from (1 - 3)");
@@ -181,6 +188,8 @@ class CruiseShip {
                 }
             }catch (InputMismatchException e){
                 System.out.println("Invalid Input\nEnter an Valid Input");
+            }catch(ArrayIndexOutOfBoundsException c){
+                System.out.println("Invalid number. Please enter an input within the given range");
             }
         }
     }
@@ -189,34 +198,41 @@ class CruiseShip {
     public static void deletePassengerFromCabin(Cabin[] cabins, Passenger[][] passengers) {
         try{
             Scanner sc = new Scanner(System.in);
-            System.out.println("Enter the Cabin Number");
+            System.out.println("Enter the Cabin Number (1 - 12)");
             int cabinNum = sc.nextInt() - 1;
-            System.out.println("Enter the Passenger Number");
+            System.out.println("Enter the Passenger Number (1 - 3)");
             int passengerNum = sc.nextInt() - 1;
-            cabins[cabinNum].setName("nobody");
-            // DELETING THE PASSENGER FROM THE CABIN
-            passengers[cabinNum][passengerNum].setFirstName("nobody");
-            passengers[cabinNum][passengerNum].setSurName("nobody");
-            passengers[cabinNum][passengerNum].setExpenses(0.0);
-            System.out.println("Customer deleted from the Cabin\n");
-            // CHECKING THE WAITING LIST
-            WaitingList waitingPassenger = WaitingList.deQueue();
-            if(waitingPassenger != null){
-                // ADDING THE WAITING PASSENGERS THE VACANT POSITION
-                passengers[cabinNum][passengerNum].setFirstName(waitingPassenger.getFirstName());
-                passengers[cabinNum][passengerNum].setSurName(waitingPassenger.getSurName());
-                passengers[cabinNum][passengerNum].setExpenses(waitingPassenger.getExpenses());
-                System.out.println("A waited Passenger " + waitingPassenger.getFirstName() + " " + waitingPassenger.getSurName() +
-                        " was added to " + "the " + "Vacant");
-                System.out.println("------------- Passenger Details -----------------");
-                System.out.println("\n Passenger ID : " + (passengerNum + 1) + "\n Passenger Name : " + waitingPassenger.getFirstName() + " " + waitingPassenger.getSurName() +
-                        "\n Passenger's Cabin : " + (cabinNum  + 1) + "\n Passenger Expenses : " + waitingPassenger.getExpenses() + "\n");
+            if(!passengers[cabinNum][passengerNum].getFirstName().equals("nobody")){
+                cabins[cabinNum].setName("nobody");
+                // DELETING THE PASSENGER FROM THE CABIN
+                passengers[cabinNum][passengerNum].setFirstName("nobody");
+                passengers[cabinNum][passengerNum].setSurName("nobody");
+                passengers[cabinNum][passengerNum].setExpenses(0.0);
+                System.out.println("Passenger deleted from the Cabin\n");
+                // CHECKING THE WAITING LIST
+                WaitingList waitingPassenger = WaitingList.deQueue();
+                if(waitingPassenger != null){
+                    // ADDING THE WAITING PASSENGERS THE VACANT POSITION
+                    passengers[cabinNum][passengerNum].setFirstName(waitingPassenger.getFirstName());
+                    passengers[cabinNum][passengerNum].setSurName(waitingPassenger.getSurName());
+                    passengers[cabinNum][passengerNum].setExpenses(waitingPassenger.getExpenses());
+                    System.out.println("A waited Passenger " + waitingPassenger.getFirstName() + " " + waitingPassenger.getSurName() +
+                            " was added to the Vacant");
+                    System.out.println("------------- Passenger Details -----------------");
+                    System.out.println("\n Passenger ID : " + (passengerNum + 1) + "\n Passenger Name : " + waitingPassenger.getFirstName() + " " + waitingPassenger.getSurName() +
+                            "\n Passenger's Cabin : " + (cabinNum  + 1) + "\n Passenger Expenses : " + waitingPassenger.getExpenses() + "\n");
+                }else{
+                    passengerCounter--;
+                    System.out.println("No Passengers were found in the Waiting List");
+                }
             }else{
-                passengerCounter--;
-                System.out.println("No Passengers were found in the Waiting List");
+                System.out.println("This Passenger slot is already Empty");
             }
+
         }catch(InputMismatchException e){
             System.out.println("Invalid Input");
+        }catch(ArrayIndexOutOfBoundsException w){
+            System.out.println("Input Out of Range. Please enter a input within the given range");
         }
     }
 
@@ -235,27 +251,23 @@ class CruiseShip {
 
     // THE FIND CABINS FORM PASSENGER METHOD IS INITIALISED
     public static void findCabinFromPassenger(Cabin[] cabins, Passenger[][] passengers){
-        try{
-            Scanner sc = new Scanner(System.in);
-            boolean found = false;
-            System.out.println("Enter the Passenger's Firstname : ");
-            String passengerFirstName = sc.nextLine();
-            System.out.println("Enter the Passenger's Surname : ");
-            String passengerSurName = sc.nextLine();
-            // LOOPS THROUGH THE CABINS AND PASSENGER ARRAYS
-            for (int i = 0; i<cabins.length; i++){
-                for(int x = 0;x<3; x++){
-                    if (passengerFirstName.equalsIgnoreCase(passengers[i][x].getFirstName()) && passengerSurName.equalsIgnoreCase(passengers[i][x].getSurName())){
-                        found = true;
-                        System.out.println(passengerFirstName + " " + passengerSurName + " is in Cabin " + (i + 1));
-                    }
+        Scanner sc = new Scanner(System.in);
+        boolean found = false;
+        System.out.println("Enter the Passenger's Firstname : ");
+        String passengerFirstName = sc.nextLine();
+        System.out.println("Enter the Passenger's Surname : ");
+        String passengerSurName = sc.nextLine();
+        // LOOPS THROUGH THE CABINS AND PASSENGER ARRAYS
+        for (int i = 0; i<cabins.length; i++){
+            for(int x = 0;x<3; x++){
+                if (passengerFirstName.equalsIgnoreCase(passengers[i][x].getFirstName()) && passengerSurName.equalsIgnoreCase(passengers[i][x].getSurName())){
+                    found = true;
+                    System.out.println(passengerFirstName + " " + passengerSurName + " is in Cabin " + (i + 1));
                 }
             }
-            if(!found){
-                System.out.println("Sorry! We can't find this Passenger");
-            }
-        }catch(InputMismatchException e){
-            System.out.println("Invalid Input");
+        }
+        if(!found){
+            System.out.println("Sorry! We can't find this Passenger");
         }
     }
 
@@ -298,6 +310,7 @@ class CruiseShip {
     // THE VIEW PASSENGERS ALPHABETICALLY METHOD IS INITIALISED
     public static void viewPassengersAlphabetically(Passenger[][] passengers){
         // CONVERTING THE 2D PASSENGER ARRAY TO A 1D ARRAY
+        // https://stackoverflow.com/questions/8935367/convert-a-2d-array-into-a-1d-array
         Passenger[] allPassengers = Arrays.stream(passengers).flatMap(Stream::of).toArray(Passenger[]::new);
         Passenger temp;
         System.out.println("All the Passengers in the Alphabetical Order");
@@ -334,6 +347,8 @@ class CruiseShip {
                         for(int i = 0;i<3;i++){
                             if(passengers[x][i].getFirstName().equals(passenger)){
                                 System.out.println(passenger + " has spent " + passengers[x][i].getExpenses());
+                            }else{
+                                System.out.println("The Passenger cannot be found");
                             }
                         }
                     }
@@ -357,6 +372,8 @@ class CruiseShip {
                 }
             }catch(InputMismatchException e){
                 System.out.println("Invalid Input");
+            }catch(ArrayIndexOutOfBoundsException e){
+                System.out.println("Input Out of Range");
             }
         }
     }
